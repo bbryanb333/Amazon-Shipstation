@@ -1,8 +1,8 @@
 SELLER_ID	= 'A895K0WHLWP9V'
 ACCESS_KEY	= 'AKIAI35HQTUTVNDKK3EA'
 SECRET_KEY	= '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'
-api_key = 'edbb945e7b004d1f801a92a707d656ca'
-api_secret = '4bd53686988446f1a6a594feae72d0e3'
+api_key = '6ade56c4595743e8a93c701650d0a68a'
+api_secret = 'e70444a93ef64dde846f08f817badc27'
 MWS_AUTH_TOKEN = 'amzn.mws.f8ba0128-5b02-0ac1-c637-19fac9a77fec'
 
 import requests, zipfile, io, json
@@ -163,7 +163,7 @@ def Send_Request():
             initials = None
             name = None
             extra = None
-            #order_id = order_id + 'test1'
+            order_id = order_id + 'test'
             if(request != ""):
                 r = requests.get(request)
                 z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -204,34 +204,34 @@ def Send_Request():
             
             
 
-                order_check = ss.fetch_orders(parameters ={'order_number': order_id})
-                #print(order_check.json())
-                if (order_check.json()['total'] == 0):
-                    ss_order = ShipStationOrder(order_number= order_id, amount_paid=unit_price, tax = tax, shipping = shipping, customer_notes=initials, internal_notes=name )
-                    ss_order.set_status('awaiting_shipment')
+            order_check = ss.fetch_orders(parameters ={'order_number': order_id})
+            #print(order_check.json())
+            if (order_check.json()['total'] == 0):
+                ss_order = ShipStationOrder(order_number= order_id, amount_paid=unit_price, tax = tax, shipping = shipping, customer_notes=initials, internal_notes=name )
+                ss_order.set_status('awaiting_shipment')
     
 
-                    shipping_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
-                    ss_order.set_shipping_address(shipping_address)
+                shipping_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
+                ss_order.set_shipping_address(shipping_address)
 
 
-                    billing_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
-                    ss_order.set_billing_address(billing_address)
+                billing_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
+                ss_order.set_billing_address(billing_address)
 
 
-                    ss_item = ShipStationItem(
-                    sku=sku,
-                    name=title,
-                    quantity=quantity,
-                    unit_price=unit_price
-                    )
+                ss_item = ShipStationItem(
+                sku=sku,
+                name=title,
+                quantity=quantity,
+                unit_price=unit_price
+                )
 
 
-                    ss_order.add_item(ss_item)
-                    ss_order.set_order_date(date=date)
+                ss_order.add_item(ss_item)
+                ss_order.set_order_date(date=date)
 
-                    ss.add_order(ss_order)
-                    print("added order")
+                ss.add_order(ss_order)
+                print("added order")
                 
 
 
