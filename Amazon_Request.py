@@ -35,7 +35,7 @@ def dict_generator(indict, pre=None):
 
 def Send_Request():
     
-    created_after = datetime.datetime.utcnow() - datetime.timedelta(hours=48)
+    created_after = datetime.datetime.utcnow() - datetime.timedelta(hours=.3)
     created_before= datetime.datetime.utcnow() - datetime.timedelta(hours=.05)
     print(created_after)
     print(created_before)
