@@ -1,8 +1,9 @@
-SELLER_ID	= 'A895K0WHLWP9V'
-ACCESS_KEY	= 'AKIAI35HQTUTVNDKK3EA'
-SECRET_KEY	= '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'
-api_key = '6ade56c4595743e8a93c701650d0a68a'
-api_secret = 'e70444a93ef64dde846f08f817badc27'
+
+SELLER_ID       = 'A895K0WHLWP9V'
+ACCESS_KEY      = 'AKIAI35HQTUTVNDKK3EA'
+SECRET_KEY      = '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'
+api_key = 'edbb945e7b004d1f801a92a707d656ca'
+api_secret = '4bd53686988446f1a6a594feae72d0e3'
 MWS_AUTH_TOKEN = 'amzn.mws.f8ba0128-5b02-0ac1-c637-19fac9a77fec'
 
 import requests, zipfile, io, json
@@ -34,7 +35,7 @@ def dict_generator(indict, pre=None):
 
 
 def Send_Request():
-    
+
     created_after = datetime.datetime.utcnow() - datetime.timedelta(hours=.3)
     created_before= datetime.datetime.utcnow() - datetime.timedelta(hours=.05)
     print(created_after)
@@ -76,7 +77,7 @@ def Send_Request():
     A3 = ""
 
     ss = ShipStation(key=api_key, secret=api_secret)
-    
+
 
     if orders.parsed.Orders != {}:
         to_parse =  False
@@ -140,7 +141,7 @@ def Send_Request():
                 response = orders_api.list_order_items(orders.parsed.Orders.Order.AmazonOrderId)
 
             #print(date)
-    
+
             for _ in dict_generator(response.parsed):
                 if "CustomizedURL" in _:
                     request = _[-1]
@@ -163,7 +164,8 @@ def Send_Request():
             initials = None
             name = None
             extra = None
-            order_id = order_id + 'test'
+
+            order_id = order_id
             if(request != ""):
                 r = requests.get(request)
                 z = zipfile.ZipFile(io.BytesIO(r.content))
@@ -171,8 +173,8 @@ def Send_Request():
                 for i in z.namelist():
                     if i.endswith(".json"):
                         jsonpath = i
-                z.extractall("C:/Amazon Request/zips")
-                f = open("C:/Amazon Request/zips/" + jsonpath)
+                z.extractall("Amazon-Shipstation/zips")
+                f = open("Amazon-Shipstation/zips/" + jsonpath)
                 #print(jsonpath)
                 data = json.load(f)
                 f.close()
@@ -187,55 +189,56 @@ def Send_Request():
                         fieldfound = False
                     if textfound:
                         nextfield = _[-1]
-                        fieldfound = True 
-        
+                        fieldfound = True
+
                     if _[-1] == "TextCustomization":
                         textfound = True
                     else:
                         textfound = False
-
+                notes = ''
                 if 'Initial' in custom:
                     initials = custom["Initial"]
 
                 if 'Name' in custom:
                     name = custom["Name"]
-
+                if 'Name' in custom or 'Initial' in custom:
+                    notes = initials + ':' + name
                 #extra= custom["extra"]
-            
-            
-
-            order_check = ss.fetch_orders(parameters ={'order_number': order_id})
-            #print(order_check.json())
-            if (order_check.json()['total'] == 0):
-                ss_order = ShipStationOrder(order_number= order_id, amount_paid=unit_price, tax = tax, shipping = shipping, customer_notes=initials, internal_notes=name )
-                ss_order.set_status('awaiting_shipment')
-    
-
-                shipping_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
-                ss_order.set_shipping_address(shipping_address)
 
 
-                billing_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
-                ss_order.set_billing_address(billing_address)
+
+                order_check = ss.fetch_orders(parameters ={'order_number': order_id})
+                #print("checked")
+                if (order_check.json()['total'] == 0):
+                    ss_order = ShipStationOrder(order_number= order_id, amount_paid=unit_price, tax = tax, shipping = shipping, customer_notes=notes, internal_notes=None )
+                    ss_order.set_status('awaiting_shipment')
 
 
-                ss_item = ShipStationItem(
-                sku=sku,
-                name=title,
-                quantity=quantity,
-                unit_price=unit_price
-                )
+                    shipping_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
+                    ss_order.set_shipping_address(shipping_address)
 
 
-                ss_order.add_item(ss_item)
-                ss_order.set_order_date(date=date)
-
-                ss.add_order(ss_order)
-                print("added order")
-                
+                    billing_address = ShipStationAddress(name=buyer_name, street1 = A1, street2 = A2, street3 = A3, city = city, state = state, postal_code = postal_code, country = country )
+                    ss_order.set_billing_address(billing_address)
 
 
-            
+                    ss_item = ShipStationItem(
+                    sku=sku,
+                    name=title,
+                    quantity=quantity,
+                    unit_price=unit_price
+                    )
+
+
+                    ss_order.add_item(ss_item)
+                    ss_order.set_order_date(date=date)
+
+                    ss.add_order(ss_order)
+                    print("added order")
+
+
+
+
             textfound = False
             fieldfound = False
             nextfield = ""
@@ -263,9 +266,10 @@ def Send_Request():
             extra = None
             #time.sleep(1)
 
-            
+
     ss.submit_orders();
     print("Done")
+
 #scheduler = BlockingScheduler()
 #scheduler.add_job(Send_Request, 'interval', minutes = 15)
 #scheduler.start()
